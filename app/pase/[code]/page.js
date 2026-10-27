@@ -87,8 +87,8 @@ export default async function PassPage({ params, searchParams }) {
   const inside = Boolean(reg.checkedInAt);
 
   return (
-    <main className="screen" style={{ gap: 22 }}>
-      <div className="stack center" style={{ alignItems: 'center', gap: 14, paddingTop: 8 }}>
+    <main className="screen pass-screen" style={{ gap: 22 }}>
+      <div className="stack center pass-headline" style={{ alignItems: 'center', gap: 14, paddingTop: 8 }}>
         <span className="check pop"><Check color="#000" draw /></span>
         <h1 className="title rise d2" style={{ fontSize: 30 }}>{inside ? `Ya entraste, ${first}` : `Estás dentro, ${first}`}</h1>
         <span className="muted rise d3" style={{ fontSize: 15 }}>{inside ? 'Disfruta el evento' : 'Muestra este QR en la entrada'}</span>
@@ -118,7 +118,7 @@ export default async function PassPage({ params, searchParams }) {
         </article>
       </div>
 
-      <div className="stack rise d5" style={{ gap: 10 }}>
+      <div className="stack rise d5 pass-actions" style={{ gap: 10 }}>
         <span className="small faint row" style={{ justifyContent: 'center', gap: 8 }}><Sun /> Sube el brillo al mostrarlo</span>
         <div className="grid2">
           <a className="btn btn-primary btn-sm" href={`/api/qr/${reg.code}`} download={`Nakecloud-${reg.code}.png`}>Guardar QR</a>
