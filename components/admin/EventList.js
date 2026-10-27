@@ -39,6 +39,7 @@ export default function EventList({ events }) {
               </span>
             </a>
             <div className="row" style={{ gap: 6, justifyContent: 'flex-end' }}>
+              <a className="chip" href={`/admin/eventos/${e.id}?tab=editar`} aria-label={`Editar ${e.name}`}>Editar</a>
               {confirming === e.id ? null : (
                 <button type="button" className="chip" style={{ color: 'var(--bad)' }} onClick={() => setConfirming(e.id)} aria-label={`Borrar ${e.name}`}>Borrar</button>
               )}

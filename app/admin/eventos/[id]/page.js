@@ -9,9 +9,11 @@ import EventAdmin from '@/components/admin/EventAdmin';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Evento', robots: { index: false, follow: false } };
 
-export default async function EventAdminPage({ params }) {
+export default async function EventAdminPage({ params, searchParams }) {
   await requireAdmin();
   const { id } = await params;
+  const sp = await searchParams;
+  const initialTab = ['registros', 'resumen', 'editar'].includes(sp?.tab) ? sp.tab : null;
   const isNew = id === 'nuevo';
   const event = isNew ? null : await getEventById(id);
   if (!isNew && !event) notFound();
@@ -26,6 +28,7 @@ export default async function EventAdminPage({ params }) {
       <TopBar current="eventos" />
       <EventAdmin
         event={event}
+        initialTab={initialTab}
         tickets={tickets}
         registrations={regs}
         publicBase={await siteUrl()}

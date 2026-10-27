@@ -15,9 +15,9 @@ const MANUAL_METHODS = ['Efectivo', 'Nequi', 'Transferencia', 'Cortesía'];
 let tmp = 0;
 const tempId = () => `new_${Date.now().toString(36)}_${tmp++}`;
 
-export default function EventAdmin({ event, tickets, registrations, publicBase, payments }) {
+export default function EventAdmin({ event, initialTab, tickets, registrations, publicBase, payments }) {
   const router = useRouter();
-  const [tab, setTab] = useState(event ? 'registros' : 'editar');
+  const [tab, setTab] = useState(event ? (initialTab || 'registros') : 'editar');
   const [toast, setToast] = useState('');
   const say = (t) => { setToast(t); clearTimeout(say.t); say.t = setTimeout(() => setToast(''), 2600); };
   const publicUrl = event ? `${publicBase}/e/${event.slug}` : '';
@@ -95,7 +95,7 @@ export default function EventAdmin({ event, tickets, registrations, publicBase, 
 
       {tab === 'registros' && event ? <Registrations event={event} tickets={tickets} regs={registrations} publicBase={publicBase} say={say} refresh={() => router.refresh()} /> : null}
       {tab === 'resumen' && event ? <Summary tickets={tickets} regs={registrations} /> : null}
-      {tab === 'editar' ? <Editor event={event} tickets={tickets} say={say} onSaved={(id, created) => { if (created) router.push(`/admin/eventos/${id}`); else { router.refresh(); setTab('registros'); } }} /> : null}
+      {tab === 'editar' ? <Editor event={event} tickets={tickets} say={say} onSaved={(id, created) => { if (created) router.push(`/admin/eventos/${id}`); else router.refresh(); }} /> : null}
 
       {toast ? <div className="toast" role="status">{toast}</div> : null}
     </>
@@ -383,6 +383,7 @@ function Editor({ event, tickets, say, onSaved }) {
       }
     }
     setBusy(false);
+    setImage(null);
     say('Evento guardado');
     onSaved(d.id, !event);
   }
