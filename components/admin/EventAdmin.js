@@ -22,8 +22,30 @@ export default function EventAdmin({ event, tickets, registrations, publicBase, 
   const say = (t) => { setToast(t); clearTimeout(say.t); say.t = setTimeout(() => setToast(''), 2600); };
   const publicUrl = event ? `${publicBase}/e/${event.slug}` : '';
 
+  // Copia con el portapapeles moderno; si el navegador lo bloquea, usa el método clásico
+  // y, como último recurso, deja el link seleccionado para copiarlo a mano.
   async function copy(text, msg) {
-    try { await navigator.clipboard.writeText(text); say(msg); } catch { say('No se pudo copiar'); }
+    try {
+      await navigator.clipboard.writeText(text);
+      say(msg);
+      return;
+    } catch {}
+    const field = document.getElementById('public-link');
+    if (field) {
+      field.focus();
+      field.select();
+      field.setSelectionRange(0, text.length);
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch {}
+      say(ok ? msg : 'Link seleccionado: cópialo con Cmd+C o mantén presionado');
+    }
+  }
+
+  async function share(text) {
+    if (navigator.share) {
+      try { await navigator.share({ title: event.name, url: text }); return; } catch (e) { if (e?.name === 'AbortError') return; }
+    }
+    copy(text, 'Link copiado');
   }
 
   return (
@@ -33,13 +55,29 @@ export default function EventAdmin({ event, tickets, registrations, publicBase, 
           <h1 className="h2">{event ? event.name : 'Nuevo evento'}</h1>
           {event ? (
             <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
-              <button type="button" className="chip" onClick={() => copy(publicUrl, 'Link copiado')}>Copiar link para historias</button>
               <a className="chip" href={publicUrl} target="_blank" rel="noopener noreferrer">Ver página</a>
               <a className="chip" href={`/admin/puerta?evento=${event.id}`}>Abrir puerta</a>
             </div>
           ) : null}
         </div>
-        {event ? <span className="muted small">{event.startsAt ? `${shortDate(event.startsAt)} · ${timeOf(event.startsAt)}` : 'Sin fecha'}{event.place ? ` · ${event.place}` : ''} · <span className="mono">{publicUrl.replace(/^https?:\/\//, '')}</span></span> : null}
+        {event ? <span className="muted small">{event.startsAt ? `${shortDate(event.startsAt)} · ${timeOf(event.startsAt)}` : 'Sin fecha'}{event.place ? ` · ${event.place}` : ''}</span> : null}
+        {event ? (
+          <div className="card" style={{ gap: 10, padding: 16 }}>
+            <label className="h3" htmlFor="public-link">Link para historias</label>
+            <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
+              <input
+                id="public-link"
+                className="field mono"
+                readOnly
+                value={publicUrl}
+                onFocus={(e) => e.target.select()}
+                style={{ flex: '1 1 280px', height: 48, fontSize: 15 }}
+              />
+              <button type="button" className="btn btn-primary btn-sm" style={{ width: 'auto' }} onClick={() => copy(publicUrl, 'Link copiado')}>Copiar</button>
+              <button type="button" className="btn btn-line btn-sm" style={{ width: 'auto' }} onClick={() => share(publicUrl)}>Compartir</button>
+            </div>
+          </div>
+        ) : null}
         {!payments.ready ? (
           <p className="pill pending" style={{ height: 'auto', padding: '8px 12px', whiteSpace: 'normal' }}>Wompi aún no está configurado: las entradas con precio quedan como pendientes y se cobran en la puerta.</p>
         ) : payments.sandbox ? (
