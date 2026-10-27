@@ -183,7 +183,7 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .bg-photo { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #000; }
 .bg-photo-img { position: absolute; inset: 0; background-size: cover; background-position: center; animation: drift 2.4s var(--ease) both; }
 .bg-photo::after { content: ''; position: absolute; inset: 0; }
-.bg-photo.cover::after { background: linear-gradient(180deg, rgba(0, 0, 0, .35) 0%, rgba(0, 0, 0, .25) 30%, rgba(0, 0, 0, .78) 62%, #000 92%); }
+.bg-photo.cover::after { background: linear-gradient(180deg, rgba(0, 0, 0, .3) 0%, rgba(0, 0, 0, .1) 28%, rgba(0, 0, 0, .72) 60%, #000 92%); }
 .bg-photo.dim .bg-photo-img { filter: blur(24px) saturate(1.1); transform: scale(1.15); animation: none; }
 .bg-photo.dim::after { background: rgba(0, 0, 0, .78); }
 .bg-photo.wide::after { background: linear-gradient(90deg, rgba(0, 0, 0, .55) 0%, rgba(0, 0, 0, .35) 35%, rgba(0, 0, 0, .7) 70%, rgba(0, 0, 0, .9) 100%), linear-gradient(0deg, rgba(0, 0, 0, .6), transparent 45%); }
