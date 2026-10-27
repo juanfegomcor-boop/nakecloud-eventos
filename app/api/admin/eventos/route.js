@@ -7,6 +7,17 @@ export const dynamic = 'force-dynamic';
 const intOrNull = (v) => { const n = parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : null; };
 const text = (v, max = 200) => String(v ?? '').trim().slice(0, max);
 
+/** Borra un evento con sus entradas y registros (la base de datos los elimina en cascada). */
+export async function DELETE(request) {
+  const denied = await denyIfNotAdmin();
+  if (denied) return denied;
+  const id = new URL(request.url).searchParams.get('id');
+  if (!id) return Response.json({ error: 'Falta el evento' }, { status: 400 });
+  const rows = await q('delete from events where id = $1 returning id', [id]);
+  if (!rows.length) return Response.json({ error: 'Evento no encontrado' }, { status: 404 });
+  return Response.json({ ok: true });
+}
+
 export async function POST(request) {
   const denied = await denyIfNotAdmin();
   if (denied) return denied;
