@@ -68,7 +68,11 @@ export default function RegisterFlow({ event, tickets, payments }) {
   }
 
   /* ---------- Piezas compartidas ---------- */
-  const orbit = (
+  const photo = (mode) => (event.imageUrl
+    ? <div className={`bg-photo ${mode}`} aria-hidden="true"><div className="bg-photo-img" style={{ backgroundImage: `url("${event.imageUrl}")` }} /></div>
+    : null);
+
+  const orbit = event.imageUrl ? null : (
     <svg className="orbit orbit-deco" aria-hidden="true" width="560" height="560" viewBox="0 0 560 560">
       <circle cx="280" cy="280" r="270" fill="none" stroke="#2A2A2E" />
       <circle cx="280" cy="280" r="200" fill="none" stroke="#1F1F23" strokeDasharray="2 10" />
@@ -150,6 +154,7 @@ export default function RegisterFlow({ event, tickets, payments }) {
   if (wide) {
     return (
       <main className="split">
+        {photo('wide')}
         {orbit}
         <section className="split-hero">
           {topBar}
@@ -186,6 +191,7 @@ export default function RegisterFlow({ event, tickets, payments }) {
   if (step === 'home') {
     return (
       <main className="screen">
+        {photo('cover')}
         {orbit}
         {topBar}
         <div className="grow" />
@@ -203,6 +209,7 @@ export default function RegisterFlow({ event, tickets, payments }) {
   if (step === 'tickets') {
     return (
       <main className="screen" key="tickets">
+        {photo('dim')}
         <div className="between fade">
           <button type="button" className="icon-btn" onClick={() => setStep('home')} aria-label="Volver"><Back /></button>
           <span className="mono small faint">1 / 2</span>
@@ -219,6 +226,7 @@ export default function RegisterFlow({ event, tickets, payments }) {
 
   return (
     <main className="screen" key="form">
+      {photo('dim')}
       <div className="between fade">
         <button type="button" className="icon-btn" onClick={() => setStep(tickets.length > 1 ? 'tickets' : 'home')} aria-label="Volver"><Back /></button>
         <span className="mono small faint">{tickets.length > 1 ? '2 / 2' : '1 / 1'}</span>

@@ -298,6 +298,31 @@ function Summary({ tickets, regs }) {
   );
 }
 
+/** Reduce la foto a máx. 1920 px y la pasa a JPEG liviano antes de subirla. */
+async function compressImage(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+    const max = 1920;
+    const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.naturalWidth * scale);
+    canvas.height = Math.round(img.naturalHeight * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    let quality = 0.82;
+    let data = canvas.toDataURL('image/jpeg', quality);
+    while (data.length > 1_400_000 && quality > 0.45) { quality -= 0.1; data = canvas.toDataURL('image/jpeg', quality); }
+    return data;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 /* ---------------- Editor ---------------- */
 function Editor({ event, tickets, say, onSaved }) {
   const [f, setF] = useState({
@@ -315,8 +340,22 @@ function Editor({ event, tickets, say, onSaved }) {
     { id: tempId(), name: 'Entreno + comida', description: 'Sesión y brunch después', price: 45000, capacity: '', active: true }
   ]);
   const [busy, setBusy] = useState(false);
+  // Imagen: null = sin cambios, '' = quitarla, 'data:...' = nueva (ya comprimida)
+  const [image, setImage] = useState(null);
+  const [imageBusy, setImageBusy] = useState(false);
+  const preview = image === null ? (event?.imageUrl || '') : image;
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
   const setT = (i, k) => (e) => setTs((list) => list.map((t, j) => (j === i ? { ...t, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value } : t)));
+
+  async function pickImage(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { say('Elige una imagen (JPG, PNG o WebP)'); return; }
+    setImageBusy(true);
+    try { setImage(await compressImage(file)); } catch { say('No se pudo leer esa imagen'); }
+    setImageBusy(false);
+  }
 
   async function save(e) {
     e.preventDefault();
@@ -328,15 +367,54 @@ function Editor({ event, tickets, say, onSaved }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: event?.id, ...f, tickets: ts.filter((t) => t.name.trim()).map((t, i) => ({ ...t, sort: i })) })
     }).catch(() => null);
-    setBusy(false);
     const d = await res?.json().catch(() => ({}));
-    if (!res?.ok) { say(d?.error || 'No se pudo guardar'); return; }
+    if (!res?.ok) { setBusy(false); say(d?.error || 'No se pudo guardar'); return; }
+
+    if (image !== null) {
+      const imgRes = image
+        ? await fetch('/api/admin/eventos/imagen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: d.id, dataUrl: image }) }).catch(() => null)
+        : await fetch(`/api/admin/eventos/imagen?id=${encodeURIComponent(d.id)}`, { method: 'DELETE' }).catch(() => null);
+      if (!imgRes?.ok) {
+        const err = await imgRes?.json().catch(() => ({}));
+        setBusy(false);
+        say(err?.error || 'El evento se guardó, pero la imagen no. Intenta de nuevo.');
+        onSaved(d.id, !event);
+        return;
+      }
+    }
+    setBusy(false);
     say('Evento guardado');
     onSaved(d.id, !event);
   }
 
   return (
     <form className="stack" style={{ gap: 18 }} onSubmit={save}>
+      <div className="card">
+        <div className="between"><span className="h3">Imagen de fondo</span><span className="small faint">Vertical u horizontal · se ve detrás de la portada</span></div>
+        <div
+          style={{
+            position: 'relative', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--line-2)',
+            aspectRatio: '16 / 9', maxWidth: '100%', background: preview ? `#000 center / cover no-repeat url("${preview}")` : 'var(--bg)',
+            display: 'flex', alignItems: 'flex-end'
+          }}
+        >
+          <div style={{ position: 'absolute', inset: 0, background: preview ? 'linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.75))' : 'transparent' }} />
+          <div style={{ position: 'relative', padding: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span className="brand" style={{ fontSize: 11 }}>NAKECLOUD</span>
+            <span style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-.03em', lineHeight: 1 }}>{f.name || 'Nombre del evento'}</span>
+            {!preview ? <span className="small faint">Sin imagen: se usa el fondo negro con la órbita.</span> : null}
+          </div>
+        </div>
+        <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
+          <label className="chip" htmlFor="e_image" style={{ cursor: 'pointer' }}>
+            {imageBusy ? <Spinner size={14} /> : null}{preview ? 'Cambiar imagen' : 'Subir imagen'}
+          </label>
+          <input id="e_image" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/*" onChange={pickImage} hidden />
+          {preview ? <button type="button" className="chip" onClick={() => setImage('')}>Quitar imagen</button> : null}
+          {image ? <span className="small faint" style={{ alignSelf: 'center' }}>Se guarda al tocar “{event ? 'Guardar cambios' : 'Crear evento'}”</span> : null}
+        </div>
+      </div>
+
       <div className="card">
         <span className="h3">Evento</span>
         <div className="form-grid">

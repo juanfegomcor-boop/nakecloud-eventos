@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getEventBySlug, getTickets, usedSeats } from '@/lib/data';
+import { getEventBySlug, getTickets, usedSeats, siteUrl } from '@/lib/data';
 import { wompiReady } from '@/lib/wompi';
 import { shortDate, timeOf } from '@/lib/format';
 import RegisterFlow from '@/components/RegisterFlow';
@@ -11,10 +11,16 @@ export async function generateMetadata({ params }) {
   const event = await getEventBySlug(slug).catch(() => null);
   if (!event) return { title: 'Evento' };
   const when = event.startsAt ? `${shortDate(event.startsAt)} · ${timeOf(event.startsAt)}` : '';
+  const base = await siteUrl();
   return {
     title: event.name,
     description: [when, event.place, event.tagline].filter(Boolean).join(' · '),
-    openGraph: { title: event.name, description: event.tagline || 'Regístrate y recibe tu QR de entrada.' }
+    openGraph: {
+      title: event.name,
+      description: event.tagline || 'Regístrate y recibe tu QR de entrada.',
+      images: event.imageUrl ? [{ url: `${base}${event.imageUrl}` }] : undefined
+    },
+    twitter: event.imageUrl ? { card: 'summary_large_image', images: [`${base}${event.imageUrl}`] } : undefined
   };
 }
 
@@ -42,6 +48,7 @@ export default async function EventPage({ params }) {
         description: event.description,
         startsAt: event.startsAt,
         place: event.place,
+        imageUrl: event.imageUrl,
         open: event.status === 'open'
       }}
       tickets={options}
