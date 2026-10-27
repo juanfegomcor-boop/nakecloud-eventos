@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
   const when = event.startsAt ? `${shortDate(event.startsAt)} · ${timeOf(event.startsAt)}` : '';
   const base = await siteUrl();
   return {
-    title: event.name,
+    title: { absolute: `${event.name} · ${event.organizer}` },
     description: [when, event.place, event.tagline].filter(Boolean).join(' · '),
     openGraph: {
       title: event.name,
@@ -49,6 +49,8 @@ export default async function EventPage({ params }) {
         startsAt: event.startsAt,
         place: event.place,
         imageUrl: event.imageUrl,
+        organizer: event.organizer,
+        eyebrow: event.eyebrow,
         open: event.status === 'open'
       }}
       tickets={options}

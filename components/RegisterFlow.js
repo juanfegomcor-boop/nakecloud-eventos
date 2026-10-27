@@ -81,15 +81,20 @@ export default function RegisterFlow({ event, tickets, payments }) {
   );
 
   const topBar = (
-    <div className="between rise" style={{ position: 'relative' }}>
-      <span className="brand">NAKECLOUD</span>
+    <div className="between rise" style={{ position: 'relative', alignItems: 'flex-start' }}>
+      <span className="stack" style={{ gap: 4 }}>
+        <span className="brand">{(event.organizer || 'Nakecloud').toUpperCase()}</span>
+        <span className="powered">powered by <b>Nakecloud</b></span>
+      </span>
       <span className={`live${closed ? ' off' : ''}`}>{closed ? closedLabel : 'Inscripciones abiertas'}</span>
     </div>
   );
 
   const hero = (
     <div className="stack hero-copy" style={{ gap: 22, position: 'relative' }}>
-      <div className="eyebrow rise d1">Evento de comunidad{event.startsAt ? ` · ${dotDate(event.startsAt)}` : ''}</div>
+      {event.eyebrow || event.startsAt ? (
+        <div className="eyebrow rise d1">{[event.eyebrow, event.startsAt ? dotDate(event.startsAt) : ''].filter(Boolean).join(' · ')}</div>
+      ) : null}
       <h1 className="display rise d2">{event.name}</h1>
       {event.tagline ? <p className="lede rise d3">{event.tagline}</p> : null}
       <div className="facts rise d4">

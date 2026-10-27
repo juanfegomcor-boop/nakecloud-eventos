@@ -22,7 +22,7 @@ export async function GET(_request, { params }) {
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART:${stamp(start)}`,
     `DTEND:${stamp(end)}`,
-    `SUMMARY:${esc(`${event.name} · Nakecloud`)}`,
+    `SUMMARY:${esc(`${event.name} · ${event.organizer}`)}`,
     `LOCATION:${esc(event.place)}`,
     `DESCRIPTION:${esc(`Entrada: ${reg.ticketName}\nCódigo: ${reg.code}\nTu pase: ${url}`)}`,
     `URL:${url}`,

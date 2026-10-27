@@ -327,6 +327,8 @@ async function compressImage(file) {
 function Editor({ event, tickets, say, onSaved }) {
   const [f, setF] = useState({
     name: event?.name || '',
+    organizer: event?.organizer || 'Nakecloud',
+    eyebrow: event ? event.eyebrow : 'Evento de comunidad',
     slug: event?.slug || '',
     tagline: event?.tagline || '',
     startsLocal: toLocalInput(event?.startsAt),
@@ -401,7 +403,8 @@ function Editor({ event, tickets, say, onSaved }) {
         >
           <div style={{ position: 'absolute', inset: 0, background: preview ? 'linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.75))' : 'transparent' }} />
           <div style={{ position: 'relative', padding: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span className="brand" style={{ fontSize: 11 }}>NAKECLOUD</span>
+            <span className="brand" style={{ fontSize: 11 }}>{(f.organizer || 'Nakecloud').toUpperCase()}</span>
+            {f.eyebrow ? <span className="eyebrow" style={{ fontSize: 10 }}>{f.eyebrow}</span> : null}
             <span style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-.03em', lineHeight: 1 }}>{f.name || 'Nombre del evento'}</span>
             {!preview ? <span className="small faint">Sin imagen: se usa el fondo negro con la órbita.</span> : null}
           </div>
@@ -420,6 +423,8 @@ function Editor({ event, tickets, say, onSaved }) {
         <span className="h3">Evento</span>
         <div className="form-grid">
           <label className="label" htmlFor="e_name">Nombre<input id="e_name" className="field" value={f.name} onChange={set('name')} placeholder="Entreno + brunch" /></label>
+          <label className="label" htmlFor="e_org">Organizador (sale arriba y en el pase)<input id="e_org" className="field" value={f.organizer} onChange={set('organizer')} placeholder="Nakecloud" maxLength={60} /></label>
+          <label className="label" htmlFor="e_eyebrow">Texto sobre el título (vacío = no se muestra)<input id="e_eyebrow" className="field" value={f.eyebrow} onChange={set('eyebrow')} placeholder="Evento de comunidad" maxLength={60} /></label>
           <label className="label" htmlFor="e_when">Fecha y hora (Bogotá)<input id="e_when" type="datetime-local" className="field" value={f.startsLocal} onChange={set('startsLocal')} /></label>
           <label className="label" htmlFor="e_place">Lugar<input id="e_place" className="field" value={f.place} onChange={set('place')} placeholder="Parque de la 93" /></label>
           <label className="label" htmlFor="e_map">Link de Google Maps (opcional)<input id="e_map" className="field" value={f.placeUrl} onChange={set('placeUrl')} placeholder="https://maps.app.goo.gl/…" /></label>

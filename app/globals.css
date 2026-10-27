@@ -73,6 +73,8 @@ button { font: inherit; color: inherit; }
   overflow: hidden;
 }
 .brand { font-size: 13px; font-weight: 600; letter-spacing: .32em; }
+.powered { font-size: 10px; letter-spacing: .06em; color: var(--faint); text-transform: lowercase; }
+.powered b { font-weight: 600; color: var(--muted); letter-spacing: .14em; text-transform: uppercase; font-size: 9px; }
 .eyebrow { font-family: var(--mono); font-size: 12px; color: var(--faint); letter-spacing: .12em; text-transform: uppercase; }
 .muted { color: var(--muted); }
 .faint { color: var(--faint); }

@@ -43,16 +43,19 @@ export async function POST(request) {
   const taken = await q('select id from events where slug = $1 and id <> $2', [slug, id || '']);
   if (taken.length) slug = `${slug}-${newId('x').slice(2, 6)}`;
 
+  const organizer = text(b.organizer, 60) || 'Nakecloud';
+  const eyebrow = text(b.eyebrow, 60); // vacío = no se muestra
+
   if (id) {
     await q(
-      `update events set name = $2, tagline = $3, starts_at = $4, place = $5, place_url = $6, capacity = $7, status = $8, slug = $9 where id = $1`,
-      [id, ...fields, slug]
+      `update events set name = $2, tagline = $3, starts_at = $4, place = $5, place_url = $6, capacity = $7, status = $8, slug = $9, organizer = $10, eyebrow = $11 where id = $1`,
+      [id, ...fields, slug, organizer, eyebrow]
     );
   } else {
     id = newId('ev');
     await q(
-      `insert into events (id, name, tagline, starts_at, place, place_url, capacity, status, slug) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [id, ...fields, slug]
+      `insert into events (id, name, tagline, starts_at, place, place_url, capacity, status, slug, organizer, eyebrow) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [id, ...fields, slug, organizer, eyebrow]
     );
   }
 

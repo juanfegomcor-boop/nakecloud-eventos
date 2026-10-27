@@ -28,15 +28,16 @@ export default async function PassPage({ params, searchParams }) {
   const event = await getEventById(reg.eventId);
   const base = await siteUrl();
   const first = reg.name.split(' ')[0];
+  const org = event?.organizer || 'Nakecloud';
   const when = event?.startsAt ? `${shortDate(event.startsAt)} · ${timeOf(event.startsAt)}` : 'Fecha por definir';
 
   if (reg.status === 'cancelled') {
     return (
       <main className="screen">
-        <span className="brand rise">NAKECLOUD</span>
+        <span className="brand rise">{org.toUpperCase()}</span>
         <div className="grow" />
         <h1 className="title rise d1">Este registro fue anulado</h1>
-        <p className="lede rise d2">Si crees que es un error, escríbenos por Instagram a @nakecloud con tu código <span className="mono">{reg.code}</span>.</p>
+        <p className="lede rise d2">Si crees que es un error, escríbele al organizador con tu código <span className="mono">{reg.code}</span>.</p>
         <div className="grow" />
       </main>
     );
@@ -49,7 +50,7 @@ export default async function PassPage({ params, searchParams }) {
       <main className="screen">
         <div className="between fade">
           {event ? <a className="icon-btn" href={`/e/${event.slug}`} aria-label="Volver al evento"><Back /></a> : <span />}
-          <span className="brand">NAKECLOUD</span>
+          <span className="brand">{org.toUpperCase()}</span>
           <span style={{ width: 44 }} />
         </div>
         <div className="grow" />
@@ -99,7 +100,7 @@ export default async function PassPage({ params, searchParams }) {
         <article className={`pass pop d3${inside ? ' dim' : ''}`}>
           <div className="pass-head">
             <div className="between">
-              <span className="brand" style={{ fontSize: 12 }}>NAKECLOUD</span>
+              <span className="brand" style={{ fontSize: 12 }}>{org.toUpperCase()}</span>
               <span className="tag">{inside ? 'Ingresó' : reg.amount > 0 ? 'Pagado' : 'Confirmado'}</span>
             </div>
             <span className="pass-name">{event?.name || 'Evento'}</span>
@@ -114,6 +115,7 @@ export default async function PassPage({ params, searchParams }) {
             <div role="img" aria-label={`Código QR de entrada ${reg.code}`} dangerouslySetInnerHTML={{ __html: qrSvg }} style={{ width: '100%', display: 'flex', justifyContent: 'center' }} />
             <span className="pass-code">{reg.code}</span>
             <span className="small" style={{ color: '#6e6e73' }}>{reg.name}</span>
+            <span style={{ fontSize: 9, letterSpacing: '.14em', color: '#8e8e93', textTransform: 'uppercase' }}>powered by Nakecloud</span>
           </div>
         </article>
       </div>
@@ -124,7 +126,7 @@ export default async function PassPage({ params, searchParams }) {
           <a className="btn btn-primary btn-sm" href={`/api/qr/${reg.code}`} download={`Nakecloud-${reg.code}.png`}>Guardar QR</a>
           <a className="btn btn-line btn-sm" href={`/api/ics/${reg.code}`}>Al calendario</a>
         </div>
-        <ShareButton url={passUrl} text={`Mi pase para ${event?.name || 'el evento'} de Nakecloud · ${when}`} />
+        <ShareButton url={passUrl} text={`Mi pase para ${event?.name || 'el evento'} de ${org} · ${when}`} />
         {event?.placeUrl ? <a className="btn btn-text" href={event.placeUrl} target="_blank" rel="noopener noreferrer">Cómo llegar · {event.place}</a> : null}
       </div>
     </main>
